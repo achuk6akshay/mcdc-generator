@@ -8,6 +8,7 @@
 	var trueArray =[];
 	var falseArray = [];
 	var finalArr = [];
+	var duplicateVariable = 0;
 
     function truthCombos(symbols) {
         if (! symbols) {
@@ -79,21 +80,11 @@
 			displayMcdc(val, sym, ast, truthCombos(sym));
 			debug('trueArray',trueArray);
 			debug('falseArray',falseArray);
-			var testCases = getConstrainedCases(trueArray,falseArray)[0];
-			displayConstrainedCases(testCases,val,sym);
-			/* $('#final').append('<table border="1"/>');
-			for (i in finalArr)
-			{
-				debug("greeet");
-				var com = $('<tr>');;
-				com.append($('<td>').text(finalArr[i]));
-				$('#final').append(com);
-				$('#final').append('</tr>');
-				
-			}  */
-			/* depth_return = f(ast,0);
-			console.log("####################### Deepest Operation : "+depth_return[0]);
-			console.log("####################### Depth : "+depth_return[1]); */
+			var finalOutput = getConstrainedCases(trueArray,falseArray,sym);
+			var testCases = finalOutput[0];
+			var variableArray = finalOutput[1];
+			displayConstrainedCases(testCases,val,sym,variableArray);
+
         } catch (e) {
             out('Unable to parse expression. ' + e);
             throw e;
@@ -211,7 +202,7 @@
         if (! $.isArray(ast)) {
             return bindings[ast];
         }
-
+        
         switch(ast[0]) {
         case '&': 
 		    /* if(!(evalSym(1) || evalSym(2))){
@@ -230,16 +221,16 @@
 			var right = evalSym(2);
 		
 			var resu1 =  left  && right;
-			if ((left  || right)===true){
-				debug(' ANDevalsymmA happening',evalSym(1));
-				  debug('ANDevalsymmB happening',evalSym(2));
-				  debug('-----------------------------------------------------------');
+			if (left  || right){
+				//debug(' ANDevalsymmA happening',evalSym(1));
+				  //debug('ANDevalsymmB happening',evalSym(2));
+				 // debug('-----------------------------------------------------------');
 				return resu1;
 			} 
 			else {
-				debug(' ANDevalsymmA',evalSym(1));
-				  debug('ANDevalsymmB',evalSym(2));
-				  debug('-----------------------------------------------------------'); 
+				//debug(' ANDevalsymmA',evalSym(1));
+				  //debug('ANDevalsymmB',evalSym(2));
+				 // debug('-----------------------------------------------------------'); 
 
 				  return  null;
 			}
@@ -262,11 +253,8 @@
 			var left = evalSym(1);
 			var right = evalSym(2);
 			var resu =   left || right;
-			if ((left  && right)===false) return  resu;
-			else {
-				//storingIndexValue.push(count);
-				return null;
-			}
+			if (left  && right) return  null;
+			else return resu;
 
 				case '!':
         case '~':
@@ -280,7 +268,7 @@
         }
 		
     }
-	//console.log('indexe not req'+storingIndexValue);
+	
 			
     that.evalExpr1 = evalExpr1;
 	
@@ -371,6 +359,9 @@
         function consumeSymbol() {
             //debug('consumeSymbol');
             var symbol = consumeToken();
+			if(symbol in symbols){
+				duplicateVariable++;
+			}
             symbols[symbol] = true;
             return symbol;
         }
@@ -458,9 +449,11 @@
                 //debug(tokens);
                 //debug(pos);
                 //debug(tokens[pos]);
+				
                 throw new SyntaxError('Could not consume all tokens. ' +
                                       'Remaining tokens: ' +
                                       tokens.slice(pos, tokens.length));
+									  
             }
 
             return [ret, symbols];
@@ -543,203 +536,8 @@
             console.log.apply(console, arguments);
         }
     }
-	
-	/* var f = function(arrx,depthx,sidex	){
-		let arr = arrx;
-		let depth = depthx;
-		let side = sidex;
-		if(side==undefined|side==null){
-			side = "Right";
-		}
 		
-			console.log("Inside "+side+" function ");
-	
-		
-		console.log("Array"+arr);
-		console.log("Array Length "+arr.length);
-		console.log("depth"+depth);
-	if(arr.length==3){
-		operator = arr[0];
-	let	left=arr[1];
-	let	right=arr[2];
-		console.log("Left : "+left);
-		console.log("Right : "+right);
-
-		let	left_return;
-		if(!$.isArray(left))		
-		left_return = [arr,depth];
-		else{
-		left_return = 	f(left,depth+1,"Left");
-		
-		}
-		let	right_return;
-		if(!$.isArray(right))
-		right_return = [arr,depth];
-		else{
-						
-
-		right_return = 	f(right,depth+1);
-
-		}
-
-		if(left_return[1]>right_return[1]){
-			console.log("left was returned : Left return: "+left_return+"\nRight return : "+right_return);
-			return left_return;
-		}else{
-			console.log("right was returned : Left return : "+left_return+"\nRight return : "+right_return);
-			return right_return;
-		}
-		
-	}else{
-		
-	let	operator = arr[0];
-	let	right = arr[1];
-	console.log("Inside Not : Right : "+right);
-		if(!$.isArray(right)){
-			console.log("constant");
-			return [arr,depth];
-		}
-		else{
-			return 	f(right,depth+1);
-		}
-		
-	}
-} */
-
-    /* function displayConstrainedCases(trueArray,falseArray){
-		var midArr = [];
-		if (trueArray.length>falseArray.length) {
-			console.log('inside true greater');
-			for(var i in falseArray){
-				
-				for(var j in trueArray){
-					var counter = 0;
-					var resMisMatch = false;
-					for(var z in trueArray[0]){
-						
-                        if(z < (trueArray[0].length-1)){
-						    //console.log('yes');
-					        if(trueArray[j][z] === falseArray[i][z]){
-							    
-							    counter++;
-								//console.log(counter);
-								
-						    }
-					    }
-						else{
-							if(trueArray[j][z] !== falseArray[i][z]){
-								//debug('resmismatch');
-								resMisMatch = true;
-							}
-						}
-					}
-					if (counter === falseArray[0].length-2 && resMisMatch){
-					    midArr.push(trueArray[j]);
-						debug('test case',falseArray[i],trueArray[j]);
-				    }
-				}
-				debug('midArr',midArr);
-				finalArr.push(midArr);
-				midArr = [];
-				debug('finalArr',finalArr);
-				
-				//counter=0;
-			}
-		}
-		else {
-			console.log('inside false greater');
-			for(var i in trueArray){
-				
-				for(var j in falseArray){
-					var counter = 0;
-					var resMisMatch = false;
-					for(var z in trueArray[0]){
-						
-                        if(z < (trueArray[0].length-1)){
-						    //console.log('yes');
-					        if(trueArray[i][z] === falseArray[j][z]){
-							    
-							    counter++;
-								//console.log(counter);
-								
-						    }
-					    }
-						else{
-							if(trueArray[i][z] !== falseArray[j][z]){
-								//debug('resmismatch');
-								resMisMatch = true;
-							}
-						}
-					}
-					if (counter === falseArray[0].length-2 && resMisMatch){
-					    midArr.push(falseArray[j]);
-						debug('test case',trueArray[i],falseArray[j]);
-				    }
-				}
-				debug('midArr',midArr);
-				finalArr.push(midArr);
-				debug('finalArr',finalArr);
-				
-				//counter=0;
-			}
-		}
-	} */
-	
-/* 	 function displayConstrainedCases(trueArray,falseArray){
-		var conArray = [];
-		if (trueArray.length>falseArray.length) {
-		    console.log('inside true greater');
-		}
-		else{
-			console.log('inside false greater');
-			debug("length",trueArray[0].length);
-			
-				//debug("k value",k);
-				if (trueArray.length == 1){
-					
-				}
-				
-			    else{
-					for(i in trueArray){
-						for(j in falseArray){
-							var counter = 0;
-							for(k = 0; k < trueArray[0].length-1;k++){
-								if (trueArray[i][k] != falseArray[j][k]){
-									counter++;
-								}
-							}
-							if (counter == 1){
-								var trueFlag = true;
-								var falseFlag = true;
-								for(y in conArray){
-									if (conArray[y].toString() === trueArray[i].toString()){
-										//debug("matching value",trueArray[i].toString(),conArray[y].toString());
-										trueFlag = false;
-									}
-									if (conArray[y].toString() === falseArray[j].toString()){
-										//debug("matching value",falseArray[j].toString(),conArray[y].toString());
-										falseFlag = false;
-									}
-								}
-										
-								if (trueFlag){
-									debug("value of z",);
-									conArray.push(trueArray[i]);
-									debug("contrueArray",trueArray[i]);
-								}
-								if(falseFlag){
-									conArray.push(falseArray[j]);
-									debug("contrueArray",trueArray[i]);
-									debug("confalseArray",falseArray[j]);
-								}
-							}
-						}
-				}
-				debug("conArray",conArray);
-		    }
-	    } */
-		
-	function getConstrainedCases(trueArray,falseArray){
+	function getConstrainedCases(trueArray,falseArray,symbols){
 		var conArray = [];
 		var varArray = [];
 		if (trueArray.length>falseArray.length) {
@@ -761,8 +559,9 @@
 						}
 					}
 					var testCasesCount = conArray.length;
-					
-					while (testCasesCount < conArray[0].length){
+					var breakLimit = 0;
+					//debug("trueArray.length + falseArray.length",trueArray.length + falseArray.length);
+					while ((testCasesCount < (conArray[0].length) )&& (breakLimit <= (trueArray.length + falseArray.length))){
 					for (k in conArray){
 						//debug("testCasesCount",testCasesCount);
 						if(conArray[k][conArray[k].length-1]){
@@ -793,8 +592,8 @@
 							} 
 						}
 					}
-					
-				
+					breakLimit++;
+				    debug("breakLimit", breakLimit);
 				}
 				
 		}
@@ -821,8 +620,9 @@
 						}
 					}
 					var testCasesCount = conArray.length;
-					
-					while (testCasesCount < conArray[0].length){
+					var breakLimit = 0;
+					debug("trueArray.length + falseArray.length",trueArray.length + falseArray.length);
+					while (testCasesCount < (conArray[0].length)&& (breakLimit <= (trueArray.length + falseArray.length))){
 					for (k in conArray){
 						//debug("testCasesCount",testCasesCount);
 						if(conArray[k][conArray[k].length-1]){
@@ -854,7 +654,8 @@
 						}
 					}
 					
-				
+				breakLimit++;
+				debug("breakLimit", breakLimit);
 				}
 				
 		}
@@ -879,7 +680,7 @@
 		return [false,0]
 	}
 	
-	function displayConstrainedCases(a,expression,sym){
+	function displayConstrainedCases(a,expression,sym,variableArray){
 		 $('#final').empty();
 
         var ret = $('<table border="1"/>');
@@ -890,6 +691,7 @@
             header.append($('<th>').text(ind));
         });
 		header.append($('<th>').text(expression));
+		header.append($('<th>').text("variable"));
         ret.append(header);
         $('#final').append(ret);
 		
@@ -899,6 +701,18 @@
 			    //debug("a[i][j]",a[i][j]);
 			    comboRow.append($('<td>').text(a[i][j]));
 			}
+			
+			
+			if (i > 0){
+				var counter = 0;
+			    $.each(sym, function(ind) {
+                
+				if (counter == variableArray[i-1] ){
+					comboRow.append($('<td>').text(ind));
+				}
+				counter++;
+                });
+			}
 		ret.append(comboRow);
 		$("#final").append(ret);
 		}
@@ -906,4 +720,5 @@
 	}
 	
 })(jQuery, window);
+
 
