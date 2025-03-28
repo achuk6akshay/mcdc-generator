@@ -718,6 +718,9 @@
 		}
 		
 	}
+	$(document).ready(function() {
+        truth.main();
+        });
 	
 })(jQuery, window);
 
